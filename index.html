@@ -2,34 +2,50 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>MDTA Shirotul Jannah</title>
-    <meta name="description" content="Website resmi MDTA Shirotul Jannah - Madrasah Diniyah Takmiliyah Awwaliyah" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MDTA Shirotul Jannah - Madrasah Diniyah Islami</title>
+    <meta name="description" content="Website resmi MDTA Shirotul Jannah - Madrasah Diniyah Takmiliyah Awwaliyah berbasis Al-Qur'an dan Sunnah" />
     <link rel="canonical" href="https://shirotuljannah.my.id/" />
-    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕌</text></svg>" />
     
-    <!-- Font & Icons -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     
     <!-- CSS -->
-    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="/css/style-islami.css" />
 </head>
 <body>
+
+    <!-- ===== TOP BAR ===== -->
+    <div class="top-bar">
+        <div class="container top-bar-inner">
+            <div class="top-bar-left">
+                <i class="fas fa-phone-alt"></i> +62 878-9763-8390
+                <span class="separator">|</span>
+                <i class="fas fa-envelope"></i> dtshirotuljannah@gmail.com
+            </div>
+            <div class="top-bar-right">
+                <span class="hijri-date" id="hijriDate"></span>
+                <span class="separator">|</span>
+                <a href="#kontak"><i class="fas fa-map-pin"></i> Lokasi</a>
+            </div>
+        </div>
+    </div>
 
     <!-- ===== HEADER / NAVBAR ===== -->
     <header>
         <div class="container header-inner">
-           <div class="logo">
-    <div class="logo-icon">
-        <img src="/images/logo.png" alt="Logo" style="width: 48px; height: 48px; border-radius: 8px; object-fit: cover;" />
-    </div>
-    <div class="logo-text">
-        MDTA <span>Shirotul Jannah</span>
-        </div>
-</div>
+            <div class="logo">
+                <div class="logo-icon">
+                    <img src="/images/logo.png" alt="Logo" style="width: 48px; height: 48px; border-radius: 8px; object-fit: cover;" />
+                </div>
+                <div class="logo-text">
+                    MDTA <span>Shirotul Jannah</span>
+                </div>
+            </div>
             <button class="hamburger" id="hamburger" aria-label="Menu">
                 <i class="fas fa-bars"></i>
             </button>
@@ -41,23 +57,34 @@
                 <a href="#galeri">Galeri</a>
                 <a href="#kontak">Kontak</a>
                 <a href="#kontak" class="btn-primary"><i class="fas fa-paper-plane"></i> Hubungi</a>
+                <!-- TOMBOL TOGGLE DARK/LIGHT MODE -->
+                <button class="theme-toggle" id="themeToggle" aria-label="Ganti tema">
+                    <i class="fas fa-moon"></i>
+                    <span class="theme-text">Gelap</span>
+                </button>
             </nav>
         </div>
     </header>
 
     <!-- ===== HERO ===== -->
-    <section class="hero" id="beranda">
+    <section class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-pattern"></div>
         <div class="container hero-grid">
             <div class="hero-text">
-                <p class="subtitle"><i class="fas fa-graduation-cap" style="color: var(--gold);"></i> Madrasah Diniyah Takmiliyah Awwaliyah</p>
-                <h1>MDTA <span>Shirotul Jannah</span></h1>
+                    <h1>
+                    <br />
+                    MDTA <span>Shirotul Jannah</span>
+                </h1>
                 <p class="tagline">
-                    <i class="fas fa-quote-left" style="color: var(--gold); margin-right: 6px;"></i>
+                    <i class="fas fa-quote-right"></i>
                     Terwujudnya generasi yang Qur'ani, Berakhlaqul Karimah, dan Berilmu Amaliah berdasarkan
                     Ahlussunnah Wal Jama'ah
+                    <i class="fas fa-quote-left"></i>
                 </p>
+                
                 <div class="hero-buttons">
-                    <a href="#profil" class="btn-primary" style="padding: 14px 32px;">
+                    <a href="#profil" class="btn-primary">
                         <i class="fas fa-info-circle"></i> Profil Kami
                     </a>
                     <a href="#kontak" class="btn-secondary">
@@ -66,37 +93,48 @@
                 </div>
             </div>
             <div class="hero-image">
-                <div class="placeholder-img">
-                    <div class="logo-icon">
-        <img src="/images/logo.png" alt="Logo" style="width: 100x; height: 200px; " />
-    </div>
-                    <p style="font-weight: 700; color: var(--primary-dark); font-size: 1.2rem;">MDTA Shirotul Jannah</p>
-                    <p style="font-size: 0.95rem; color: var(--text-light);">Kp. Pasir Lanjung RT.02 RW. 03 Desa Jagabaya Kecamatan Cimaung Kabupaten Bandung</p>
-                    <div style="margin-top: 14px; font-size: 0.85rem; background: var(--white); padding: 6px 18px; border-radius: 40px; display: inline-block; box-shadow: 0 2px 10px rgba(0,0,0,0.06);">
-                        <i class="fas fa-check-circle" style="color: var(--primary);"></i>
+                <div class="hero-card">
+                    <div class="hero-card-pattern"></div>
+                    <div class="hero-card-content">
+                        <img src="/images/logo.png" alt="Logo" style="width: 100x; height: 200px; " />
+                        <p>Kp. Pasir Lanjung RT.02 RW. 03 Desa Jagabaya Kecamatan Cimaung Kabupaten Bandung</p>
                     </div>
                 </div>
             </div>
         </div>
+        <div class="hero-wave">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C63.87,86.32,105.17,76.41,147,69.4Z" fill="var(--wave-color, #ffffff)"/>
+            </svg>
+        </div>
     </section>
 
-    <!-- ===== PROFIL (VISI MISI) ===== -->
+    <!-- ===== PROFIL ===== -->
     <section id="profil">
         <div class="container">
             <div class="section-title">
+                <div class="section-decoration">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span></span>
+                </div>
                 <h2>Profil MDTA Shirotul Jannah</h2>
                 <p>Menjadi lembaga pendidikan Islam unggul berbasis Al-Qur'an dan Sunnah</p>
             </div>
             <div class="visi-misi-grid">
-                <div class="card">
-                    <h3><i class="fas fa-eye"></i> Visi</h3>
-                    <p style="font-size: 1.05rem; font-weight: 500; color: var(--primary-dark);">
+                <div class="card card-visi">
+                    <div class="card-icon"><i class="fas fa-eye"></i></div>
+                    <h3>Visi</h3>
+                    <div class="card-divider"></div>
+                    <p style="font-size: 1.05rem; font-weight: 500; color: var(--gold);">
                         Terwujudnya generasi yang Qur'ani, Berakhlaqul Karimah, dan Berilmu Amaliah berdasarkan
-Ahlussunnah Wal Jama'ah
+                        Ahlussunnah Wal Jama'ah
                     </p>
                 </div>
-                <div class="card">
-                    <h3><i class="fas fa-bullseye"></i> Misi</h3>
+                <div class="card card-misi">
+                    <div class="card-icon"><i class="fas fa-bullseye"></i></div>
+                    <h3>Misi</h3>
+                    <div class="card-divider"></div>
                     <ul>
                         <li>Menyelenggarakan pendidikan Al-Qur'an dengan metode tahsin dan tajwid yang baik dan benar.</li>
                         <li>Menanamkan aqidah yang lurus dan akhlaq mulia dalam kehidupan sehari-hari.</li>
@@ -111,40 +149,45 @@ Ahlussunnah Wal Jama'ah
     </section>
 
     <!-- ===== PROGRAM ===== -->
-    <section id="program" style="background: var(--white);">
+    <section id="program" class="program-section">
         <div class="container">
             <div class="section-title">
+                <div class="section-decoration">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span></span>
+                </div>
                 <h2>Program Unggulan</h2>
                 <p>Berbagai program pendidikan untuk membentuk generasi rabbani</p>
             </div>
             <div class="program-grid">
                 <div class="program-item">
-                    <i class="fas fa-book-quran"></i>
+                    <div class="program-icon"><i class="fas fa-book-quran"></i></div>
                     <h4>Al-Qur'an</h4>
                     <p>Baca, hafal, dan pahami Al-Qur'an dengan tajwid</p>
                 </div>
                 <div class="program-item">
-                    <i class="fas fa-book-quran"></i>
+                    <div class="program-icon"><i class="fas fa-book-quran"></i></div>
                     <h4>Hadits &amp; Aqidah</h4>
                     <p>Pembelajaran hadits pilihan dan aqidah Ahlus Sunnah</p>
                 </div>
                 <div class="program-item">
-                    <i class="fas fa-flag"></i>
+                    <div class="program-icon"><i class="fas fa-flag"></i></div>
                     <h4>Sejarah Islam</h4>
                     <p>Mengenal peradaban Islam dan tokoh-tokohnya</p>
                 </div>
                 <div class="program-item">
-                    <i class="fas fa-language"></i>
+                    <div class="program-icon"><i class="fas fa-language"></i></div>
                     <h4>Bahasa Arab</h4>
                     <p>Dasar-dasar bahasa Arab </p>
                 </div>
                 <div class="program-item">
-                    <i class="fas fa-hand-holding-heart"></i>
+                    <div class="program-icon"><i class="fas fa-hand-holding-heart"></i></div>
                     <h4>Akhlak &amp; Adab</h4>
                     <p>Pembinaan karakter dan adab sehari-hari</p>
                 </div>
                 <div class="program-item">
-                    <i class="fas fa-chalkboard-user"></i>
+                    <div class="program-icon"><i class="fas fa-chalkboard-user"></i></div>
                     <h4>Ekstrakurikuler</h4>
                     <p>Kegiatan tambahan seperti hadroh, pidato, dan karya tulis</p>
                 </div>
@@ -152,89 +195,103 @@ Ahlussunnah Wal Jama'ah
         </div>
     </section>
 
-    <!-- ===== GURU & TENAGA PENDIDIK ===== -->
-    <section id="guru">
+    <!-- ===== GURU ===== -->
+    <section id="guru" class="guru-section">
         <div class="container">
             <div class="section-title">
+                <div class="section-decoration">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span></span>
+                </div>
                 <h2>Pendidik &amp; Tenaga Kependidikan</h2>
                 <p>Guru-guru berkualitas yang berdedikasi</p>
             </div>
-                
-             </div>
+            
+        </div>
     </section>
 
     <!-- ===== GALERI ===== -->
-    <section id="galeri" style="background: var(--white);">
+    <section id="galeri" class="galeri-section">
         <div class="container">
             <div class="section-title">
+                <div class="section-decoration">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span></span>
+                </div>
                 <h2>Galeri Kegiatan</h2>
                 <p>Momen terbaik dari kegiatan belajar mengajar</p>
             </div>
             <div class="galeri-grid">
-                <div class="galeri-item">
-                    <div style="text-align: center;">
-                        <i class="fas fa-children"></i>
-                        <span>Belajar di Kelas</span>
+                <div class="galeri-item" onclick="openLightbox('/images/gallery-1.jpg')" style="background: url('/images/gallery-1.jpg') center/cover no-repeat;">
+                    <div class="galeri-overlay">
+                        <i class="fas fa-search-plus"></i>
+                        <span style="display: block; font-size: 0.9rem; margin-top: 8px;">Belajar di Kelas</span>
                     </div>
                 </div>
-                <div class="galeri-item">
-                    <div style="text-align: center;">
-                        <i class="fas fa-book-open"></i>
-                        <span>Mengaji Bersama</span>
+                <div class="galeri-item" onclick="openLightbox('/images/gallery-2.jpg')" style="background: url('/images/gallery-2.jpg') center/cover no-repeat;">
+                    <div class="galeri-overlay">
+                        <i class="fas fa-search-plus"></i>
+                        <span style="display: block; font-size: 0.9rem; margin-top: 8px;">Mengaji Bersama</span>
                     </div>
                 </div>
-                <div class="galeri-item">
-                    <div style="text-align: center;">
-                        <i class="fas fa-people-arrows"></i>
-                        <span>Kegiatan Peringatan</span>
+                <div class="galeri-item" onclick="openLightbox('/images/gallery-3.jpg')" style="background: url('/images/gallery-3.jpg') center/cover no-repeat;">
+                    <div class="galeri-overlay">
+                        <i class="fas fa-search-plus"></i>
+                        <span style="display: block; font-size: 0.9rem; margin-top: 8px;">Kegiatan Peringatan</span>
                     </div>
                 </div>
-                <div class="galeri-item">
-                    <div style="text-align: center;">
-                        <i class="fas fa-mosque"></i>
-                        <span>Wisata Religi</span>
+                <div class="galeri-item" onclick="openLightbox('/images/gallery-4.jpg')" style="background: url('/images/gallery-4.jpg') center/cover no-repeat;">
+                    <div class="galeri-overlay">
+                        <i class="fas fa-search-plus"></i>
+                        <span style="display: block; font-size: 0.9rem; margin-top: 8px;">Wisata Religi</span>
                     </div>
                 </div>
             </div>
-            <p style="text-align: center; margin-top: 24px; color: var(--text-light);">
-                <i class="fas fa-camera" style="color: var(--gold);"></i> 
-                Koleksi foto lengkap akan segera diupdate
-            </p>
+            <div class="galeri-more">
+                <i class="fas fa-camera"></i> Koleksi foto lengkap akan segera diupdate
+            </div>
         </div>
     </section>
 
     <!-- ===== KONTAK ===== -->
-    <section id="kontak">
+    <section id="kontak" class="kontak-section">
         <div class="container">
             <div class="section-title">
+                <div class="section-decoration">
+                    <span></span>
+                    <i class="fas fa-star"></i>
+                    <span></span>
+                </div>
                 <h2>Hubungi Kami</h2>
                 <p>Sampaikan pertanyaan atau kunjungi langsung</p>
             </div>
             <div class="kontak-grid">
                 <div class="kontak-info">
                     <div class="kontak-item">
-                        <i class="fas fa-map-pin"></i>
+                        <div class="kontak-icon"><i class="fas fa-map-pin"></i></div>
                         <div>
                             <div class="label">Alamat</div>
                             <div class="value">Kp. Pasir Lanjung RT.02 RW. 03 Desa Jagabaya Kecamatan Cimaung Kabupaten Bandung</div>
                         </div>
                     </div>
                     <div class="kontak-item">
-                        <i class="fas fa-phone-alt"></i>
+                        <div class="kontak-icon"><i class="fas fa-phone-alt"></i></div>
                         <div>
                             <div class="label">Telepon / WA</div>
                             <div class="value">+62 878-9763-8390</div>
                         </div>
                     </div>
                     <div class="kontak-item">
-                        <i class="fas fa-envelope"></i>
+                        <div class="kontak-icon"><i class="fas fa-envelope"></i></div>
                         <div>
                             <div class="label">Email</div>
                             <div class="value">dtshirotuljannah@gmail.com</div>
                         </div>
                     </div>
                     <div class="kontak-item">
-                        <i class="fas fa-clock"></i>
+                        <div class="kontak-icon"><i class="fas fa-clock"></i></div>
                         <div>
                             <div class="label">Jam Belajar</div>
                             <div class="value">Senin - Jumat : 13.00 - 17.30 WIB</div>
@@ -242,48 +299,69 @@ Ahlussunnah Wal Jama'ah
                     </div>
                 </div>
                 <div class="map-placeholder" style="padding: 0; border: none; background: transparent; min-height: unset;">
-    <iframe 
-        src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d961.6749907253343!2d107.57025680353883!3d-7.07759489919228!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sid!2sid!4v1786503640006!5m2!1sid!2sid" 
-        width="100%" 
-        height="350" 
-        style="border:0; border-radius: 12px;" 
-        allowfullscreen="" 
-        loading="lazy" 
-        referrerpolicy="strict-origin-when-cross-origin">
-    </iframe>
-</div>
+                    <iframe 
+                        src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d961.6749907253343!2d107.57025680353883!3d-7.07759489919228!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sid!2sid!4v1786503640006!5m2!1sid!2sid" 
+                        width="100%" 
+                        height="350" 
+                        style="border:0; border-radius: 12px;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="strict-origin-when-cross-origin">
+                    </iframe>
+                </div>
             </div>
         </div>
     </section>
 
+    <!-- ===== LIGHTBOX ===== -->
+    <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+        <img src="" alt="Foto" id="lightbox-img" onclick="event.stopPropagation();" />
+    </div>
+
     <!-- ===== FOOTER ===== -->
     <footer>
         <div class="container">
-            <div class="footer-brand">
-                <i class="fas fa-mosque"></i> MDTA Shirotul Jannah
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <div class="footer-logo">
+                        
+                        MDTA <span>Shirotul Jannah</span>
+                    </div>
+                    <p>Madrasah Diniyah Takmiliyah Awwaliyah yang berkomitmen mencetak generasi Qur'ani dan berakhlak mulia.</p>
+                    <div class="footer-social">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>Menu</h4>
+                    <a href="#">Beranda</a>
+                    <a href="#profil">Profil</a>
+                    <a href="#program">Program</a>
+                    <a href="#guru">Guru</a>
+                    <a href="#galeri">Galeri</a>
+                    <a href="#kontak">Kontak</a>
+                </div>
+                <div class="footer-contact">
+                    <h4>Kontak</h4>
+                    <p><i class="fas fa-map-pin"></i> Kp. Pasir Lanjung RT.02 RW. 03 Desa Jagabaya Kecamatan Cimaung Kabupaten Bandung</p>
+                    <p><i class="fas fa-phone-alt"></i> +62 878-9763-8390</p>
+                    <p><i class="fas fa-envelope"></i> dtshirotuljannah@gmail.com</p>
+                </div>
             </div>
-            <div class="footer-links">
-                <a href="#">Beranda</a>
-                <a href="#profil">Profil</a>
-                <a href="#program">Program</a>
-                <a href="#guru">Guru</a>
-                <a href="#galeri">Galeri</a>
-                <a href="#kontak">Kontak</a>
+            <div class="footer-bottom">
+                <p>
+                    &copy; 2026 <a href="https://shirotuljannah.my.id/">shirotuljannah.my.id</a> &mdash;
+                    </i> Madrasah Diniyah Takmiliyah Awwaliyah
+                </p>
             </div>
-            <div class="footer-social">
-                <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-                <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
-            </div>
-            <p class="footer-copy">
-                &copy; 2026 <a href="https://shirotuljannah.my.id/">shirotuljannah.my.id</a> &mdash; 
-                <i class="fas fa-heart" style="color: var(--gold);"></i> Madrasah Diniyah Takmiliyah Awwaliyah
-            </p>
         </div>
     </footer>
 
     <!-- ===== JAVASCRIPT ===== -->
-    <script src="/js/script.js"></script>
+    <script src="/js/script-islami.js"></script>
 </body>
 </html>
