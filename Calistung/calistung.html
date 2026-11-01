@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Monitoring Bimbel Calistung</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center hidden">
+        <div class="bg-white px-6 py-4 rounded-xl shadow-xl flex items-center space-x-4">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+            <span class="font-medium text-slate-700" id="loadingText">Menghubungkan ke Google Spreadsheet...</span>
+        </div>
+    </div>
+
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 border border-slate-100">
+            <div class="text-center mb-8">
+                <img src="logo_mdta.png" alt="Logo Bimbel" class="w-16 h-16 mx-auto mb-3 object-contain rounded-xl shadow-sm">
+				                <h1 class="text-2xl font-bold text-slate-900">Bimbel Calistung</h1>
+                <p class="text-sm text-slate-500 mt-1">Sistem Monitoring Perkembangan Anak</p>
+            </div>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Pilih Peran Login</label>
+                    <select id="loginRole" onchange="toggleLoginFields()" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                        <option value="admin">Tutor / Admin</option>
+                        <option value="parent">Orang Tua / Wali Siswa</option>
+                    </select>
+                </div>
+
+                <!-- Input Password khusus Tutor / Admin -->
+                <div id="adminPasswordContainer">
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Password Admin</label>
+                    <input type="password" id="adminPassword" placeholder="Masukkan Password Admin" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <!-- Input Dropdown khusus Orang Tua -->
+                <div id="parentSelectContainer" class="hidden">
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">Pilih Nama Anak</label>
+                    <select id="loginStudentSelect" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                        <!-- Diisi dinamis -->
+                    </select>
+                </div>
+
+                <!-- Input PIN khusus Orang Tua -->
+                <div id="parentPinContainer" class="hidden">
+                    <label class="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1">PIN Orang Tua</label>
+                    <input type="password" id="loginPin" placeholder="Masukkan PIN Orang Tua" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <button type="submit" class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-indigo-100 transition duration-200">
+                    Masuk ke Sistem
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="mainApp" class="hidden flex flex-col min-h-screen">
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <img src="logo_mdta.png" alt="Logo" class="w-10 h-10 rounded-xl object-contain shadow-md shadow-indigo-100">
+                    <div>
+                        <h2 class="font-bold text-slate-900 leading-tight">Calistung Monitor</h2>
+                        <span id="userRoleBadge" class="text-xs font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Tutor Mode</span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="fetchDataFromSheet()" class="p-2 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 rounded-xl transition" title="Sinkronisasi Data">
+                        🔄 Sinkron
+                    </button>
+                    <button onclick="handleLogout()" class="px-4 py-2 text-sm font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-xl transition">
+                        Keluar
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs (Admin Only) -->
+        <div id="adminNav" class="bg-white border-b border-slate-100 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto flex space-x-2 overflow-x-auto py-2">
+                <button onclick="switchTab('dashboard')" class="tab-btn px-4 py-2 rounded-xl text-sm font-medium bg-indigo-50 text-indigo-600 transition">📊 Dashboard</button>
+                <button onclick="switchTab('siswa')" class="tab-btn px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">👥 Data Siswa</button>
+                <button onclick="switchTab('absensi')" class="tab-btn px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">📋 Absensi</button>
+                <button onclick="switchTab('perkembangan')" class="tab-btn px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">📈 Catatan Harian</button>
+                <button onclick="switchTab('rapor')" class="tab-btn px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition">📑 Rapor & Filter</button>
+            </div>
+        </div>
+
+        <!-- Content Body -->
+        <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+            
+            <!-- TAB: DASHBOARD -->
+            <div id="tab-dashboard" class="space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Siswa</p>
+                        <h3 id="statTotalSiswa" class="text-3xl font-bold text-slate-900 mt-2">0</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Rata-rata Membaca</p>
+                        <h3 id="statAvgMembaca" class="text-3xl font-bold text-indigo-600 mt-2">0 / 5</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Rata-rata Menulis</p>
+                        <h3 id="statAvgMenulis" class="text-3xl font-bold text-indigo-600 mt-2">0 / 5</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs">
+                        <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Rata-rata Berhitung</p>
+                        <h3 id="statAvgBerhitung" class="text-3xl font-bold text-indigo-600 mt-2">0 / 5</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs">
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Grafik Perkembangan Kelas (Rata-rata)</h3>
+                    <div class="h-80 relative">
+                        <canvas id="overviewChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: SISWA -->
+            <div id="tab-siswa" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs">
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Tambah Siswa Baru</h3>
+                    <form onsubmit="handleAddSiswa(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <input type="text" id="inputNamaSiswa" placeholder="Nama Lengkap Anak" required class="px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <select id="inputLevelSiswa" class="px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                            <option value="Pemula">Pemula</option>
+                            <option value="Menengah">Menengah</option>
+                            <option value="Lanjutan">Lanjutan</option>
+                        </select>
+                        <input type="text" id="inputPinSiswa" placeholder="PIN Akses Orang Tua (Cth: 1234)" required class="px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button type="submit" class="sm:col-span-3 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition">Simpan Siswa ke Spreadsheet</button>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-xs overflow-hidden">
+                    <div class="p-6 border-b border-slate-100">
+                        <h3 class="text-lg font-bold text-slate-900">Daftar Siswa Terdaftar</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider">
+                                    <th class="p-4 font-semibold">Nama Anak</th>
+                                    <th class="p-4 font-semibold">Level</th>
+                                    <th class="p-4 font-semibold">PIN Orang Tua</th>
+                                    <th class="p-4 font-semibold">ID</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableSiswaBody" class="divide-y divide-slate-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: ABSENSI -->
+            <div id="tab-absensi" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs">
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Input Absensi Harian</h3>
+                    <form onsubmit="handleSaveAbsensi(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <select id="absensiSiswa" class="px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white" required></select>
+                        <input type="date" id="absensiTanggal" required class="px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <select id="absensiStatus" class="px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                            <option value="Hadir">Hadir</option>
+                            <option value="Izin">Izin</option>
+                            <option value="Sakit">Sakit</option>
+                            <option value="Alpa">Alpa</option>
+                        </select>
+                        <button type="submit" class="sm:col-span-3 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition">Simpan Absensi</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TAB: PERKEMBANGAN -->
+            <div id="tab-perkembangan" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs">
+                    <h3 class="text-lg font-bold text-slate-900 mb-4">Catatan Perkembangan Calistung (Skala 1 - 5)</h3>
+                    <form onsubmit="handleSavePerkembangan(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Pilih Siswa</label>
+                                <select id="perkSiswa" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white" required></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Tanggal</label>
+                                <input type="date" id="perkTanggal" required class="w-full px-4 py-3 rounded-xl border border-slate-200">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Membaca (1-5)</label>
+                                <input type="number" min="1" max="5" id="perkMembaca" value="3" required class="w-full px-4 py-3 rounded-xl border border-slate-200">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Menulis (1-5)</label>
+                                <input type="number" min="1" max="5" id="perkMenulis" value="3" required class="w-full px-4 py-3 rounded-xl border border-slate-200">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Berhitung (1-5)</label>
+                                <input type="number" min="1" max="5" id="perkBerhitung" value="3" required class="w-full px-4 py-3 rounded-xl border border-slate-200">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Catatan Pengajar / Evaluasi</label>
+                            <textarea id="perkCatatan" rows="3" placeholder="Tulis catatan perkembangan anak..." class="w-full px-4 py-3 rounded-xl border border-slate-200"></textarea>
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition">Simpan Perkembangan</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TAB: RAPOR & LAPORAN -->
+            <div id="tab-rapor" class="space-y-6 hidden">
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs space-y-4">
+                    <h3 class="text-lg font-bold text-slate-900">Rapor & Filter Laporan Siswa</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Pilih Siswa</label>
+                            <select id="raporSiswaSelect" onchange="renderRaporView()" class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Dari Tanggal</label>
+                            <input type="date" id="filterStartDate" onchange="renderRaporView()" class="w-full px-4 py-3 rounded-xl border border-slate-200">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Sampai Tanggal</label>
+                            <input type="date" id="filterEndDate" onchange="renderRaporView()" class="w-full px-4 py-3 rounded-xl border border-slate-200">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rapor Container / Print Area -->
+                <div id="raporPrintArea" class="bg-white p-8 rounded-2xl border border-slate-100 shadow-xs space-y-6">
+                    <div class="border-b border-slate-200 pb-4 flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900">RAPOR PERKEMBANGAN CALISTUNG</h2>
+                            <p class="text-sm text-slate-500">Bimbingan Belajar Anak</p>
+                        </div>
+                        <button onclick="window.print()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-xl text-sm transition">🖨️ Cetak Rapor</button>
+                    </div>
+
+                    <div id="raporContentInfo" class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm bg-slate-50 p-4 rounded-xl">
+                        <!-- Info Siswa -->
+                    </div>
+
+                    <div class="h-64 relative">
+                        <canvas id="raporChart"></canvas>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-slate-900 mb-3">Riwayat Catatan & Nilai</h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider">
+                                        <th class="p-3">Tanggal</th>
+                                        <th class="p-3">Membaca</th>
+                                        <th class="p-3">Menulis</th>
+                                        <th class="p-3">Berhitung</th>
+                                        <th class="p-3">Catatan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="raporTableBody" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- SCRIPT APLIKASI -->
+    <script>
+        const API_URL = "https://script.google.com/macros/s/AKfycbzNftHmC2iGDcebUmcWgqZQJAAiBen7QPHewbNeTTrwfnTWN2Kcfd7zR4j0tr1vkHkbdg/exec";
+        
+        // Password default untuk Admin / Tutor (Anda bisa mengubahnya di sini)
+        const ADMIN_PASSWORD_DEFAULT = "admin123";
+
+        let dbData = { siswa: [], absensi: [], perkembangan: [] };
+        let currentUser = { role: 'admin', studentId: null };
+        let overviewChartInstance = null;
+        let raporChartInstance = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const today = new Date().toISOString().split('T')[0];
+            if(document.getElementById('absensiTanggal')) document.getElementById('absensiTanggal').value = today;
+            if(document.getElementById('perkTanggal')) document.getElementById('perkTanggal').value = today;
+            
+            fetchDataFromSheet();
+        });
+
+        function showLoading(show, text = "Memproses data...") {
+            const overlay = document.getElementById('loadingOverlay');
+            document.getElementById('loadingText').innerText = text;
+            if(show) overlay.classList.remove('hidden');
+            else overlay.classList.add('hidden');
+        }
+
+        async function fetchDataFromSheet() {
+            showLoading(true, "Mengambil data dari Google Spreadsheet...");
+            try {
+                let response = await fetch(API_URL + "?action=getData");
+                let result = await response.json();
+                dbData = result;
+                populateDropdowns();
+                updateDashboardStats();
+                if(currentUser.role === 'admin') {
+                    renderSiswaTable();
+                } else if(currentUser.role === 'parent') {
+                    renderRaporView();
+                }
+            } catch (error) {
+                alert("Gagal mengambil data dari server: " + error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function sendDataToSheet(action, payload) {
+    showLoading(true, "Menyimpan ke Google Spreadsheet...");
+    try {
+        // Menggunakan URLSearchParams agar kompatibel dengan Google Apps Script tanpa bentrok CORS
+        const formData = new URLSearchParams();
+        formData.append("action", action);
+        formData.append("payload", JSON.stringify(payload));
+
+        await fetch(API_URL, {
+            method: "POST",
+            mode: "no-cors", // Menghindari masalah NetworkError / CORS pada Google Apps Script
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: formData.toString()
+        });
+
+        // Beri jeda sedikit agar Google Sheets selesai menulis baris baru sebelum di-refresh
+        setTimeout(async () => {
+            await fetchDataFromSheet();
+            showLoading(false);
+            alert("Data berhasil disimpan ke Spreadsheet!");
+        }, 1500);
+
+    } catch (error) {
+        showLoading(false);
+        alert("Gagal menyimpan data: " + error);
+    }
+}
+
+        function toggleLoginFields() {
+            const role = document.getElementById('loginRole').value;
+            const adminContainer = document.getElementById('adminPasswordContainer');
+            const parentContainer = document.getElementById('parentSelectContainer');
+            const pinContainer = document.getElementById('parentPinContainer');
+            
+            if(role === 'parent') {
+                adminContainer.classList.add('hidden');
+                parentContainer.classList.remove('hidden');
+                pinContainer.classList.remove('hidden');
+                populateLoginStudentDropdown();
+            } else {
+                adminContainer.classList.remove('hidden');
+                parentContainer.classList.add('hidden');
+                pinContainer.classList.add('hidden');
+            }
+        }
+
+        function populateLoginStudentDropdown() {
+            const select = document.getElementById('loginStudentSelect');
+            select.innerHTML = '';
+            dbData.siswa.forEach(s => {
+                let opt = document.createElement('option');
+                opt.value = s.id;
+                opt.innerText = s.nama;
+                select.appendChild(opt);
+            });
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const role = document.getElementById('loginRole').value;
+            
+            if(role === 'admin') {
+                const passwordInput = document.getElementById('adminPassword').value;
+                if(passwordInput !== ADMIN_PASSWORD_DEFAULT) {
+                    alert("Password Admin / Tutor salah!");
+                    return;
+                }
+
+                currentUser = { role: 'admin', studentId: null };
+                document.getElementById('adminNav').classList.remove('hidden');
+                document.getElementById('userRoleBadge').innerText = "Tutor / Admin";
+            } else {
+                const selectedId = document.getElementById('loginStudentSelect').value;
+                const inputPin = document.getElementById('loginPin').value;
+                const student = dbData.siswa.find(s => s.id == selectedId);
+                
+                if(!student || student.pinOrangTua != inputPin) {
+                    alert("PIN Orang Tua salah!");
+                    return;
+                }
+                
+                currentUser = { role: 'parent', studentId: selectedId };
+                document.getElementById('adminNav').classList.add('hidden');
+                document.getElementById('userRoleBadge').innerText = "Orang Tua: " + student.nama;
+            }
+
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            
+            if(currentUser.role === 'parent') {
+                switchTab('rapor');
+                document.getElementById('raporSiswaSelect').value = currentUser.studentId;
+                document.getElementById('raporSiswaSelect').disabled = true;
+                renderRaporView();
+            } else {
+                switchTab('dashboard');
+            }
+        }
+
+        function handleLogout() {
+            currentUser = { role: 'admin', studentId: null };
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('adminPassword').value = '';
+            document.getElementById('loginPin').value = '';
+            document.getElementById('raporSiswaSelect').disabled = false;
+        }
+
+        function switchTab(tabId) {
+            if(currentUser.role === 'parent' && tabId !== 'rapor') return;
+            
+            ['dashboard', 'siswa', 'absensi', 'perkembangan', 'rapor'].forEach(t => {
+                const el = document.getElementById('tab-' + t);
+                if(el) el.classList.add('hidden');
+            });
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+
+            if(tabId === 'rapor') renderRaporView();
+        }
+
+        function populateDropdowns() {
+            const siswaList = dbData.siswa || [];
+            
+            const absSiswa = document.getElementById('absensiSiswa');
+            if(absSiswa) {
+                absSiswa.innerHTML = '';
+                siswaList.forEach(s => absSiswa.innerHTML += `<option value="${s.id}">${s.nama}</option>`);
+            }
+
+            const perkSiswa = document.getElementById('perkSiswa');
+            if(perkSiswa) {
+                perkSiswa.innerHTML = '';
+                siswaList.forEach(s => perkSiswa.innerHTML += `<option value="${s.id}">${s.nama}</option>`);
+            }
+
+            const raporSiswa = document.getElementById('raporSiswaSelect');
+            if(raporSiswa) {
+                raporSiswa.innerHTML = '';
+                siswaList.forEach(s => raporSiswa.innerHTML += `<option value="${s.id}">${s.nama}</option>`);
+            }
+        }
+
+        function handleAddSiswa(e) {
+            e.preventDefault();
+            const payload = {
+                id: "S-" + Date.now(),
+                nama: document.getElementById('inputNamaSiswa').value,
+                level: document.getElementById('inputLevelSiswa').value,
+                pinOrangTua: document.getElementById('inputPinSiswa').value
+            };
+            sendDataToSheet("saveSiswa", payload);
+            e.target.reset();
+        }
+
+        function handleSaveAbsensi(e) {
+            e.preventDefault();
+            const payload = {
+                idSiswa: document.getElementById('absensiSiswa').value,
+                tanggal: document.getElementById('absensiTanggal').value,
+                status: document.getElementById('absensiStatus').value
+            };
+            sendDataToSheet("saveAbsensi", payload);
+            alert("Absensi berhasil disimpan!");
+        }
+
+        function handleSavePerkembangan(e) {
+            e.preventDefault();
+            const payload = {
+                idSiswa: document.getElementById('perkSiswa').value,
+                tanggal: document.getElementById('perkTanggal').value,
+                membaca: document.getElementById('perkMembaca').value,
+                menulis: document.getElementById('perkMenulis').value,
+                berhitung: document.getElementById('perkBerhitung').value,
+                catatan: document.getElementById('perkCatatan').value
+            };
+            sendDataToSheet("savePerkembangan", payload);
+            e.target.reset();
+            alert("Catatan perkembangan berhasil disimpan!");
+        }
+
+        function renderSiswaTable() {
+            const tbody = document.getElementById('tableSiswaBody');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            dbData.siswa.forEach(s => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50/50">
+                        <td class="p-4 font-medium text-slate-900">${s.nama}</td>
+                        <td class="p-4"><span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-semibold">${s.level}</span></td>
+                        <td class="p-4 text-slate-600 font-mono">${s.pinOrangTua}</td>
+                        <td class="p-4 text-slate-400 font-mono text-xs">${s.id}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function updateDashboardStats() {
+            document.getElementById('statTotalSiswa').innerText = dbData.siswa.length;
+            
+            let totalM = 0, totalW = 0, totalH = 0, count = dbData.perkembangan.length;
+            dbData.perkembangan.forEach(p => {
+                totalM += Number(p.membaca || 0);
+                totalW += Number(p.menulis || 0);
+                totalH += Number(p.berhitung || 0);
+            });
+
+            document.getElementById('statAvgMembaca').innerText = count ? (totalM/count).toFixed(1) + " / 5" : "0 / 5";
+            document.getElementById('statAvgMenulis').innerText = count ? (totalW/count).toFixed(1) + " / 5" : "0 / 5";
+            document.getElementById('statAvgBerhitung').innerText = count ? (totalH/count).toFixed(1) + " / 5" : "0 / 5";
+
+            const ctx = document.getElementById('overviewChart').getContext('2d');
+            if(overviewChartInstance) overviewChartInstance.destroy();
+
+            overviewChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Membaca', 'Menulis', 'Berhitung'],
+                    datasets: [{
+                        label: 'Rata-rata Kelas',
+                        data: [count ? totalM/count : 0, count ? totalW/count : 0, count ? totalH/count : 0],
+                        backgroundColor: ['#6366f1', '#a855f7', '#ec4899'],
+                        borderRadius: 12
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 5 } } }
+            });
+        }
+
+        function renderRaporView() {
+            const studentId = currentUser.role === 'parent' ? currentUser.studentId : document.getElementById('raporSiswaSelect').value;
+            const student = dbData.siswa.find(s => s.id == studentId);
+            if(!student) return;
+
+            const startDate = document.getElementById('filterStartDate').value;
+            const endDate = document.getElementById('filterEndDate').value;
+
+            let perks = dbData.perkembangan.filter(p => p.idSiswa == studentId);
+            if(startDate) perks = perks.filter(p => p.tanggal >= startDate);
+            if(endDate) perks = perks.filter(p => p.tanggal <= endDate);
+            perks.sort((a,b) => new Date(a.tanggal) - new Date(b.tanggal));
+
+            const absensiList = dbData.absensi.filter(a => a.idSiswa == studentId);
+            let hadir = absensiList.filter(a => a.status === 'Hadir').length;
+            let totalAbsen = absensiList.length;
+            let persentaseHadir = totalAbsen ? Math.round((hadir / totalAbsen) * 100) : 100;
+
+            document.getElementById('raporContentInfo').innerHTML = `
+                <div><span class="text-slate-400 block text-xs">NAMA SISWA</span><strong class="text-slate-900">${student.nama}</strong></div>
+                <div><span class="text-slate-400 block text-xs">LEVEL</span><strong class="text-indigo-600">${student.level}</strong></div>
+                <div><span class="text-slate-400 block text-xs">TOTAL SESI</span><strong class="text-slate-900">${totalAbsen} Sesi</strong></div>
+                <div><span class="text-slate-400 block text-xs">KEHADIRAN</span><strong class="text-emerald-600">${persentaseHadir}%</strong></div>
+            `;
+
+            const tbody = document.getElementById('raporTableBody');
+            tbody.innerHTML = '';
+            perks.forEach(p => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="p-3 font-medium">${p.tanggal}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded font-bold">${p.membaca}</span></td>
+                        <td class="p-3"><span class="px-2 py-0.5 bg-purple-50 text-purple-600 rounded font-bold">${p.menulis}</span></td>
+                        <td class="p-3"><span class="px-2 py-0.5 bg-pink-50 text-pink-600 rounded font-bold">${p.berhitung}</span></td>
+                        <td class="p-3 text-slate-600">${p.catatan || '-'}</td>
+                    </tr>
+                `;
+            });
+
+            const ctx = document.getElementById('raporChart').getContext('2d');
+            if(raporChartInstance) raporChartInstance.destroy();
+
+            raporChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: perks.map(p => p.tanggal),
+                    datasets: [
+                        { label: 'Membaca', data: perks.map(p => p.membaca), borderColor: '#6366f1', tension: 0.3, fill: false },
+                        { label: 'Menulis', data: perks.map(p => p.menulis), borderColor: '#a855f7', tension: 0.3, fill: false },
+                        { label: 'Berhitung', data: perks.map(p => p.berhitung), borderColor: '#ec4899', tension: 0.3, fill: false }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 5 } } }
+            });
+        }
+    </script>
+</body>
+</html>
